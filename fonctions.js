@@ -160,17 +160,20 @@ const formatMessage=function(id,email,username,lastname,text){
  function oldMsg(socket,room){
     connection.query(`SELECT* FROM room${room}`,async (err,result)=>{
     if(err) throw err;
-    await client.LRANGE(room,0,-1, function(err,ress){
+   // let yoyo=ress[0]
+        //let houhou=ress[1]
+        socket.emit("afficherMsg",result);
+   /* await client.LRANGE(room,0,-1, function(err,ress){
       if(err) throw err;
         let yoyo=ress[0]
         let houhou=ress[1]
         socket.emit("afficherMsg",result,yoyo,houhou);
-    })
+    })*/
   })
   }
 //store message into DB
-function storeMsg(room,email,resu,img){ 
-  connection.query(`INSERT INTO room${room} SET id=?,email=?,username=?,lastname=?,message=?,img=?,time=?,date=?`,[resu.id,email,resu.username,resu.lastname,resu.text,img,resu.time,resu.date],(err,result)=>{
+function storeMsg(room,email,username,lastname,message){ 
+  connection.query(`INSERT INTO room${room} SET email=?,username=?,lastname=?,message=?,time=?,date=?`,[email,username,lastname,message,Date.now(),Date.now()],(err,result)=>{
       if(err) throw err;
   })
    }

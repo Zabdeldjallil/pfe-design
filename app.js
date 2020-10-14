@@ -21,6 +21,7 @@ const io=socketio(server);
 const methodOverride = require('method-override');
 const flash = require('connect-flash');
 const multer=require("multer")
+const {sendEmail,main,usersRoom,userLeave,getUserId,joinChat,formatMessage,oldMsg,storeMsg,cons,usernameFind,dede,trouver}=require("./fonctions")
 //app.use/set
 app.use(express.static("public"))
 app.use(methodOverride('_method'))
@@ -31,6 +32,7 @@ app.use(session({
   saveUninitialized: true
 }));
 const ejs=require("ejs");
+
 //set and use
 app.set("view engine",'ejs')
 app.use(bodyParser.json());
@@ -42,12 +44,44 @@ app.use(flash());
 app.use(cookieParser());
 //router
 app.use('/', require("./router"));
-//routes
-app.get("/messages",function(req,res){
-    res.render("messages")
+//socket.io
+io.on('connection',socket=>{
+socket.on("joined",async ({username,lastname,email,room})=>{
+  trouver(email,function(verif,res){
+    if(verif==true) socket.disconnect();
+    if(verif==false){
+      console.log(res)
+     /* let number=usernameFind(username,lastname,room);
+      if(number!=0){  
+        lastname=lastname.concat(number) 
+      }*/
+      joinChat(socket.id,username,lastname,email,room,function(element){
+        console.log(element)
+        socket.join(element.room);
+       // dede()
+        oldMsg(socket,element.room)
+       /* usersRoom(element.room,function(t){
+          io.to(element.room).emit("roomUsers",{room:element.room,users:t})
+        });*/
+      })
+    }
+  })
+  //message
+  socket.on("onMessage",(message,username,email,lastname,role,room)=>{
+      io.to(room).emit("message",message,email);
+      storeMsg(room,email,username,lastname,message);
+    })
+  //disconnect
+socket.on("disconnect",()=>{
+  let user=userLeave(socket.id,function(resu){
+    if(resu!=null){
+    usersRoom(resu.room,function(t){
+    io.to(resu.room).emit('roomUsers',{room:resu.room,users:t})
+    })}
+  });
+// dede()
+        })
 })
-app.get("/conversation",function(req,res){
-    res.render("conversation")
 })
 //PORTS
 const REDIS_PORT=6379||process.env.PORT;

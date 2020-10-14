@@ -27,8 +27,39 @@ router.get("/signup",function(req,res){
         res.render("signup")
     })
 router.get("/index",isLoggedIn,function(req,res){
-        res.render("index")
+    res.render("index")
     })
+router.get("/add-post",isLoggedIn,function(req,res){
+    res.render("add-post")
+})
+router.get("/settings",isLoggedIn,function(req,res){
+    res.render("settings")
+})
+router.get('/profil',isLoggedIn,function(req,res){
+    res.render("profil")
+})
+router.get("/messages",isLoggedIn,function(req,res){
+    res.render("messages")
+})
+router.get('/update-user',isLoggedIn,function(req,res){
+    res.render("update-user")
+})
+router.get("/conversation/:number",isLoggedIn,function(req,res){
+    /*connection.query(`SELECT * FROM room${req.params.number}`,function(err,result){
+        if(err) throw err;
+        //console.log(req.user)
+        res.render("conversation",{msgs:result,user:req.user});
+    })*/
+    res.render("conversation",{user:req.user});
+})
+router.get('/404',function(req,res){
+    res.render("404")
+})
+//disconnect
+router.get('/logout', (req, res) => {
+    req.logOut()
+    res.redirect('/')
+  })
 //posts    
 router.post("/registered",function(req,res){
     //console.log(req.body)
@@ -62,7 +93,16 @@ router.post("/index",passport.authenticate('local-login', {
       req.session.cookie.expires = false;
      }
     })
-    function isLoggedIn(req, res, next){
+router.post("/add-post",isLoggedIn,function(req,res){
+    if(req.body.titre.trim().length===0){res.render("add-post",{msg:"Le titre doit être spécifié"});}
+  else  if(req.body.contenu.trim().length===0){res.render("add-post",{msg:"Le contenu du post ne peut être vide"});}
+  else { connection.query("INSERT into posts SET email=?,firstname=?,lastname=?,time=?,date=?,title=?,text=?",[req.user.email,req.user.Firstname,req.user.Lastname,now.format("h:mm:ss a"),now.format("DD-MM-YYYY"),req.body.titre,req.body.contenu],function(err,result){
+        if (err) throw err;
+        res.redirect("/index")
+    })}
+})
+//verification function
+function isLoggedIn(req, res, next){
         if(req.isAuthenticated())
          return next();
        
