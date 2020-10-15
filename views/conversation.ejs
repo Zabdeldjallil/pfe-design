@@ -139,33 +139,15 @@ const outPut=function(msg,emails){
       lastname= lastname.concat("⭐")
       console.log(lastname)
                   }
-          
       let room=location.pathname.split("")[14]
       socket.emit("joined",{username,lastname,email,room});
 socket.on("afficherMsg",(result)=>{
   result.forEach(element=>{
     if(element.email==email){
+    console.log("kifkif")
       const div=document.createElement("div");
       div.innerHTML=`
-    <div class="flex w-full mt-4">
-      <div
-              class="h-12 w-12 rounded-full border border-blue-400 overflow-hidden"
-            >
-              <img
-                src="https://randomuser.me/api/portraits/men/75.jpg"
-                alt="pfe logo"
-              />
-            </div>
-            <div class="message-content bg-white mx-2 w-5/6 rounded-lg p-2">
-              ${element.message}
-            </div>
-          </div>`
-      document.querySelector(".messages").appendChild(div);
-    }
-    else{
-      const div=document.createElement("div");
-      div.innerHTML=`
-    <div class='flex w-full mt-4 justify-end'>
+      <div class='flex w-full mt-4 justify-end'>
       <div
               class="message-content bg-blue-400 text-white mx-2 w-5/6 rounded-lg p-2"
             >
@@ -182,6 +164,26 @@ socket.on("afficherMsg",(result)=>{
           </div>`
             document.querySelector(".messages").appendChild(div);
     }
+      if(element.email!=email){
+        const div=document.createElement("div");
+      div.innerHTML=`
+      <div class="flex w-full mt-4">
+      <div
+              class="h-12 w-12 rounded-full border border-blue-400 overflow-hidden"
+            >
+              <img
+                src="https://randomuser.me/api/portraits/men/75.jpg"
+                alt="pfe logo"
+              />
+            </div>
+            <div class="message-content bg-white mx-2 w-5/6 rounded-lg p-2">
+              ${element.message}
+            </div>
+          </div>`
+      document.querySelector(".messages").appendChild(div);
+      }
+      
+    
   })
 })
 let button=document.getElementById("envoie");

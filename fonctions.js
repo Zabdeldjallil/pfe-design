@@ -173,7 +173,7 @@ const formatMessage=function(id,email,username,lastname,text){
   }
 //store message into DB
 function storeMsg(room,email,username,lastname,message){ 
-  connection.query(`INSERT INTO room${room} SET email=?,username=?,lastname=?,message=?,time=?,date=?`,[email,username,lastname,message,Date.now(),Date.now()],(err,result)=>{
+  connection.query(`INSERT INTO room${room} SET email=?,username=?,lastname=?,message=?,time=?,date=?`,[email,username,lastname,message,new Date().toLocaleTimeString(),new Date().toLocaleDateString()],(err,result)=>{
       if(err) throw err;
   })
    }

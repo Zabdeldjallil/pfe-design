@@ -27,16 +27,22 @@ router.get("/signup",function(req,res){
         res.render("signup")
     })
 router.get("/index",isLoggedIn,function(req,res){
-    res.render("index")
+    connection.query("SELECT * FROM posts",function(err,result){
+        if(err) throw err;
+        res.render("index",{posts:result})
+    })
     })
 router.get("/add-post",isLoggedIn,function(req,res){
     res.render("add-post")
 })
 router.get("/settings",isLoggedIn,function(req,res){
-    res.render("settings")
+    res.render("settings",{user:req.user})
 })
 router.get('/profil',isLoggedIn,function(req,res){
-    res.render("profil")
+    connection.query("SELECT * FROM posts WHERE email=?",[req.user.email],function(err,result){
+        if (err) throw err;
+        res.render("profil",{user:req.user,posts:result})
+    })
 })
 router.get("/messages",isLoggedIn,function(req,res){
     res.render("messages")
@@ -55,6 +61,10 @@ router.get("/conversation/:number",isLoggedIn,function(req,res){
 router.get('/404',function(req,res){
     res.render("404")
 })
+//not certain
+/*router.get("/single",function(res,res){
+    res.render("single-post")
+})*/
 //disconnect
 router.get('/logout', (req, res) => {
     req.logOut()
@@ -75,7 +85,7 @@ router.post("/registered",function(req,res){
             let activated=false;
          connection.query("INSERT INTO users (Firstname,Lastname,email, password,activated,akey,role,sex) values (?,?,?,?,?,?,?,?)",[req.body.firstname,req.body.lastname,req.body.email,HPSW,activated,toto,'user',req.body.sex],function(err,rows) { 
           if(err) throw err;
-      // main(req.body.email,toto);
+       main(req.body.email,toto);
           res.redirect("/")
          })
        }
@@ -100,6 +110,27 @@ router.post("/add-post",isLoggedIn,function(req,res){
         if (err) throw err;
         res.redirect("/index")
     })}
+})
+//here need fix
+router.post("/update-user",isLoggedIn,function(req,res){
+   connection.query("SELECT * FROM users WHERE email=?",[req.user.email],function(err,result){
+    if(err) throw err;
+    if (bcrypt.compareSync(req.body.password,result[0].password)){
+        if(req.body.npassword.length>=8){
+            let nhashed=bcrypt.hashSync(req.body.npassword, 10, null);
+            connection.query("UPDATE users SET Lastname=?,Firstname=?,sex=?,password=? WHERE email=?",[req.body.nom,req.body.prenom,req.body.sex,nhashed,req.user.email],function(err,resu){
+                if(err) throw err;
+            })
+        }
+        else{
+            res.render("update-user",{msg:'Nouveau mot de passe incompatible'});
+        }
+   }
+   else{
+       res.render("update-user",{msg:'Mot de passe incorrect'});
+   }
+   })
+    
 })
 //verification function
 function isLoggedIn(req, res, next){
